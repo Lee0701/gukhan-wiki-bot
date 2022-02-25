@@ -16,6 +16,7 @@ on:
         description: 'Maximum Recent Changes'
         default: 20
         type: number
+  push:
 
 # Auto Run every 1 Hours
   schedule:
