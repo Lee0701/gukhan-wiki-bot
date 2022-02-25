@@ -1,0 +1,63 @@
+name: Check & Tweet Diff
+on: 
+  workflow_dispatch:
+    inputs:
+      withOutTweet:
+        description: 'Run Without Tweet'
+        type: boolean
+      hours:
+        description: 'Hours of ago'
+        default: 1
+        type: number
+      timestamp:
+        description: 'Unix Timestamp'
+        type: number
+      rclimit:
+        description: 'Maximum Recent Changes'
+        default: 20
+        type: number
+  push:
+
+# Auto Run every 1 Hours
+  schedule:
+    - cron: '0 */1 * * *'
+jobs:
+  diff:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-node@v2
+      with:
+        node-version: 'lts/*'
+    - uses: actions/checkout@master
+    - id: node-cache
+      uses: actions/cache@v2
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-${{ github.repository }}-node-modules-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ github.repository }}-node-modules-
+    - if: steps.node-cache.outputs.cache-hit != 'true'
+      run: |
+        # Install Dependencies if no cache-hit
+        yarn install
+    - run: yarn tweet:diff
+      env:
+        # TZ default to Asia/Tokyo
+        TZ: 'Asia/Tokyo'
+        # inputs on workflow_dispatch
+        TIMESTAMP: ${{ github.event.inputs.timestamp }}
+        HOURS_AGO: ${{ github.event.inputs.hours }}
+        WITH_OUT_TWEET: ${{ github.event.inputs.withOutTweet }}
+        MEDIAWIKI_RECENT_CHANGES_RCLIMIT: ${{ github.event.inputs.rclimit }}
+        # secrets
+        TWITTER_CONSUMER_KEY: ${{ secrets.TWITTER_CONSUMER_KEY }}
+        TWITTER_CONSUMER_SECRET: ${{ secrets.TWITTER_CONSUMER_SECRET }}
+        TWITTER_ACCESS_TOKEN_KEY: ${{ secrets.TWITTER_ACCESS_TOKEN_KEY }}
+        TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
+        GOOGLE_PAGESPEED_API_KEY: ${{ secrets.GOOGLE_PAGESPEED_API_KEY }}
+        MEDIAWIKI_PROTOCOL: ${{ secrets.MEDIAWIKI_PROTOCOL }}
+        MEDIAWIKI_HOST: ${{ secrets.MEDIAWIKI_HOST }}
+        MEDIAWIKI_API_ENDPOINT: ${{ secrets.MEDIAWIKI_API_ENDPOINT }}
+        MEDIAWIKI_USER_AGENT: ${{ secrets.MEDIAWIKI_USER_AGENT }}

@@ -1,6 +1,10 @@
 
 .DS_Store
 
+# Ignore package-lock.json => use yarn.lock
+package-lock.json
+!yarn.lock
+
 # Logs
 logs
 *.log
