@@ -16,7 +16,7 @@ const ax = axios.create({
 
 const editSummary = async (props) => {
     const rcstart = new Date(parseInt(props.rcstart) || new Date().getTime())
-    const rcend = new Date(parseInt(props.rcend*1000) || (new Date().getTime() - 1000*60*60))
+    const rcend = new Date(parseInt(props.rcend) || (new Date().getTime() - 1000*60*60))
     const rclimit = props.rclimit || 20
     const rcnamespace = props.rcnamespace || '0'
 
@@ -58,7 +58,7 @@ const editSummary = async (props) => {
 
     const topPageUrl = combineURLs(WIKI_URL, encodeURIComponent(topPages[0][0]))
     const screenshot = await webScreenshot(encodeURIComponent(topPageUrl))
-    const screenshotData = screenshot.replace('data:image/webp;base64', '')
+    const screenshotData = screenshot.replace('data:image/webp;base64,', '')
 
     const timeDiff = Math.round((rcstart.getTime() - rcend.getTime()) / (1000*60*60))
     const contentPrefix = `最近 ${timeDiff}時間동안의 編輯現況입니다.`
@@ -70,7 +70,7 @@ const editSummary = async (props) => {
 }
 
 const main = async () => {
-    const args = process.argv.slice(2)    
+    const args = process.argv.slice(2)
     await editSummary(buildProps(args))
 }
 

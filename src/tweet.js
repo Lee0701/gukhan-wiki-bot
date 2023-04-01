@@ -16,7 +16,7 @@ const tweet = async (content, media) => {
             media_category: 'tweet_image',
             media_data: media,
         }
-        const response = await client.post('https://upload.twitter.com/1.1/media/upload.json', data)
+        const response = await client.post('media/upload', data)
         const media_id = response['media_id_string']
         media_ids.push(media_id)
     }
