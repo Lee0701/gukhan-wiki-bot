@@ -16,7 +16,7 @@ const formatDate = (date) => {
 
 const webScreenshot = async (url) => {
     const {data} = await axios.create().get(`https://www.googleapis.com/pagespeedonline/v5/runPagespeed?key=${PAGESPEED_API_KEY}&url=${url}`)
-    return data['lighthouseResult']['audits']['full-page-screenshot']['details']['screenshot']['data']
+    return data['lighthouseResult']['fullPageScreenshot']['screenshot']['data']
 }
 
 module.exports = {
