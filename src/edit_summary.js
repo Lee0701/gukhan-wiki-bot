@@ -53,20 +53,22 @@ const editSummary = async (props) => {
     const topPages = Object.entries(pages)
             .filter((entry) => entry[1] > 0)
             .sort((a, b) => b[1] - a[1])
-            .slice(0, 5)
+            .slice(0, 4)
     if(!topPages.length) return
 
-    const topPageUrl = combineURLs(WIKI_URL, encodeURIComponent(topPages[0][0]))
-    const screenshot = await webScreenshot(encodeURIComponent(topPageUrl))
-    const screenshotData = screenshot.replace('data:image/webp;base64,', '')
+    const screenshots = await Promise.all(topPages.map(async (entry) => {
+        const url = combineURLs(WIKI_URL, encodeURIComponent(entry[0]))
+        const screenshot = await webScreenshot(encodeURIComponent(url))
+        return screenshot.replace('data:image/webp;base64,', '')
+    }))
 
     const timeDiff = Math.round((rcstart.getTime() - rcend.getTime()) / (1000*60*60))
     const contentPrefix = `最近 ${timeDiff}時間동안의 編輯現況입니다.`
-    const contentSuffix = `寫眞: ${topPages[0][0]} ${topPageUrl}`
+    const contentSuffix = ``
     const contentList = topPages.map(([name, diff]) => `* ${name} : +${diff}바이트`).join('\n')
     const content = `${contentPrefix}\n${contentList}\n\n${contentSuffix}`
 
-    await tweet(content, screenshotData)
+    await tweet(content, screenshots)
 }
 
 const main = async () => {

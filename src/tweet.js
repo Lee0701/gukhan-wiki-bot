@@ -10,17 +10,18 @@ const client = new Twitter({
 })
 
 const tweet = async (content, media) => {
-    let media_ids = []
-    if(media) {
+    if(!media) media = []
+    else if(typeof media === 'string') media = [media]
+    const media_ids = await Promise.all(media.map(async (m) => {
         const data = {
             media_category: 'tweet_image',
-            media_data: media,
+            media_data: m,
         }
         const response = await client.post('media/upload', data)
         const media_id = response['media_id_string']
-        media_ids.push(media_id)
-    }
-    
+        return media_id
+    }))
+
     const result = await client.post('statuses/update', {
         status: content,
         media_ids: media_ids.join(','),
