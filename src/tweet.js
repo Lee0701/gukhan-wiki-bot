@@ -1,31 +1,23 @@
 
 require('dotenv').config()
-const Twitter = require('twitter')
+const { TwitterApi, EUploadMimeType }  = require('twitter-api-v2')
 
-const client = new Twitter({
-    consumer_key: process.env.CONSUMER_KEY,
-    consumer_secret: process.env.CONSUMER_SECRET,
-    access_token_key: process.env.ACCESS_TOKEN_KEY,
-    access_token_secret: process.env.ACCESS_TOKEN_SECRET,
+const client = new TwitterApi({
+    appKey: process.env.CONSUMER_KEY,
+    appSecret: process.env.CONSUMER_SECRET,
+    accessToken: process.env.ACCESS_TOKEN_KEY,
+    accessSecret: process.env.ACCESS_TOKEN_SECRET,
 })
 
 const tweet = async (content, media) => {
     if(!media) media = []
     else if(typeof media === 'string') media = [media]
     const media_ids = await Promise.all(media.map(async (m) => {
-        const data = {
-            media_category: 'tweet_image',
-            media_data: m,
-        }
-        const response = await client.post('media/upload', data)
-        const media_id = response['media_id_string']
+        const media_id = await client.v1.uploadMedia(Buffer.from(m, 'base64'), {mimeType: EUploadMimeType.Webp})
         return media_id
     }))
 
-    const result = await client.post('statuses/update', {
-        status: content,
-        media_ids: media_ids.join(','),
-    })
+    const result = await client.v2.tweet(content, {media: {media_ids}})
     return result
 }
 
